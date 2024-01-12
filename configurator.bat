@@ -1,1 +1,0 @@
-@vRY.exe --config
