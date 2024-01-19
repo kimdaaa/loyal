@@ -1,9 +1,8 @@
 import requests
 
 class Content():
-    def __init__(self, Requests, log):
+    def __init__(self, Requests):
         self.Requests = Requests
-        self.log = log
         self.content = {}
 
     def get_content(self):
@@ -13,14 +12,14 @@ class Content():
     def get_latest_season_id(self, content):
         for season in content["Seasons"]:
             if season["IsActive"]:
-                self.log(f"retrieved season id: {season['ID']}")
+                print(f"retrieved season id: {season['ID']}")
                 return season["ID"]
 
     def get_previous_season_id(self, content):
         previous = content["Seasons"][0]
         for season in content["Seasons"]:
             if season["IsActive"]:
-                self.log(f"retrieved previous season id: {previous['ID']}")
+                print(f"retrieved previous season id: {previous['ID']}")
                 return previous["ID"]
             # Only store the previous act.
             if (season["Type"] == "episode"):
@@ -35,7 +34,7 @@ class Content():
         agent_dict.update({"": ""})
         for agent in rAgents["data"]:
             agent_dict.update({agent['uuid'].lower(): agent['displayName']})
-        self.log(f"retrieved agent dict: {agent_dict}")
+        print(f"retrieved agent dict: {agent_dict}")
         return agent_dict
 
     def get_all_maps(self):
@@ -50,7 +49,7 @@ class Content():
         map_dict.update({None: None})
         for Vmap in maps["data"]:
             map_dict.update({Vmap['mapUrl'].lower(): Vmap['displayName']})
-        self.log(f"retrieved map dict: {map_dict}")
+        print(f"retrieved map dict: {map_dict}")
         return map_dict
 
     def get_map_splashes(self, val_maps) -> dict:

@@ -4,9 +4,8 @@
 
 
 class Menu:
-    def __init__(self, Requests, log, presences):
+    def __init__(self, Requests, presences):
         self.Requests = Requests
-        self.log = log
         self.presences = presences
 
     def get_party_json(self, GamePlayersPuuid, presencesDICT):
@@ -29,7 +28,7 @@ class Menu:
         for party in parties_to_delete:
             del party_json[party]
 
-        self.log(f"retrieved party json: {party_json}")
+        print(f"retrieved party json: {party_json}")
         return party_json
 
     def get_party_members(self, self_puuid, presencesDICT):
@@ -47,5 +46,22 @@ class Menu:
                 if decodedPresence["partyId"] == party_id and presence["puuid"] != self_puuid:
                     res.append({"Subject": presence["puuid"], "PlayerIdentity": {"AccountLevel":
                                                                                      decodedPresence["accountLevel"]}})
-        self.log(f"retrieved party members: {res}")
+        print(f"retrieved party members: {res}")
         return res
+    def get_party_id(self):
+        global response
+        try:
+            response = self.Requests.fetch('glz', f"/parties/v1/players/6cf07500-2f92-5309-b3ae-17990e01f899", 'get')
+
+            if 'CurrentPartyID' in response:
+                current_party_id = response['CurrentPartyID']
+                print(f"Current Party ID: {current_party_id}")
+                return current_party_id
+            else:
+                print("No CurrentPartyID found in the response.")
+                return 0
+        except (KeyError, TypeError):
+            print("Error in retrieving Party ID.")
+            return 0
+    
+        

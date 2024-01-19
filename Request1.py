@@ -5,6 +5,8 @@ from json.decoder import JSONDecodeError
 import requests
 import os
 from requests.exceptions import ConnectionError
+import urllib3
+from colorama import Fore, Style, init
 
 class Requests:
     def __init__(self):
@@ -16,6 +18,7 @@ class Requests:
         self.headers = {}
 
         self.puuid = '9783a546-2a5d-53ec-bd8f-a46d311425e0'
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         #fetch puuid so its avaible outside
         if not self.get_headers(init=True):
             self.get_lockfile(ignoreLockfile=True)
@@ -24,7 +27,7 @@ class Requests:
         try:
             if url_type == "glz":
                 response = requests.request(method, self.glz_url + endpoint, headers=self.get_headers(), verify=False)
-                print(f"fetch: url: '{url_type}', endpoint: {endpoint}, method: {method},"
+                print(f"[!] fetch: url: '{url_type}', endpoint: {endpoint}, method: {method},"
                     f" response code: {response.status_code}")
 
                 if response.status_code == 404:
@@ -39,7 +42,7 @@ class Requests:
                     pass
                 if not response.ok:
                     if response.status_code == 429:
-                        print("response not ok glz endpoint: rate limit 429")
+                        print(f"{Fore.RED}'response not ok glz endpoint: rate limit 429'{Fore.RESET}")
                     else:
                         print("response not ok glz endpoint: " + response.text)
                     time.sleep(rate_limit_seconds+5)
@@ -49,7 +52,7 @@ class Requests:
             elif url_type == "pd":
                 response = requests.request(method, self.pd_url + endpoint, headers=self.get_headers(), verify=False)
                 print(
-                    f"fetch: url: '{url_type}', endpoint: {endpoint}, method: {method},"
+                    f"[!] fetch: url: '{url_type}', endpoint: {endpoint}, method: {method},"
                     f" response code: {response.status_code}")
                 if response.status_code == 404:
                     return response
@@ -131,17 +134,18 @@ class Requests:
                     version = version_without_shipping.split("-")
                     version.insert(2, "shipping")
                     version = "-".join(version)
-                    print(f"got version from logs '{version}'")
+                    print(f"{Fore.YELLOW}got version from logs '{version}'")
                     return version
 
     def get_lockfile(self, ignoreLockfile=False):
         path = os.path.join(os.getenv('LOCALAPPDATA'), R'Riot Games\Riot Client\Config\lockfile')
         
         with open(path) as lockfile:
-            print("opened lockfile")
+            print(f"{Fore.GREEN}lockfile data obtained")
             data = lockfile.read().split(':')
             keys = ['name', 'PID', 'port', 'password', 'protocol']
             return dict(zip(keys, data))
+    
 
 
     def get_headers(self, refresh=False, init=False):

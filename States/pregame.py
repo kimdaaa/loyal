@@ -3,11 +3,8 @@
 
 
 class Pregame:
-    def __init__(self, Requests, log):
-        self.log = log
-
+    def __init__(self, Requests):
         self.Requests = Requests
-
         self.response = ""
 
 
@@ -19,7 +16,7 @@ class Pregame:
             if response.get("errorCode") == "RESOURCE_NOT_FOUND":
                 return 0
             match_id = response['MatchID']
-            print(f"retrieved pregame match id: '{match_id}'")
+            print(f"[+] retrieved pregame match id: '{match_id}'")
             return match_id
         except (KeyError, TypeError):
             print(f"cannot find pregame match id: {response}")
@@ -29,7 +26,7 @@ class Pregame:
                 print(f"retrieved pregame match id: '{match_id}'")
                 return match_id
             except (KeyError, TypeError):
-                print(f"No match id found. {self.response}")
+                print(f"[-] No match id found. {self.response}")
             return 0
 
     def get_pregame_stats(self):

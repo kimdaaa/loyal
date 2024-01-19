@@ -2,8 +2,7 @@ import time
 
 
 class Coregame:
-    def __init__(self, Requests, log):
-        self.log = log
+    def __init__(self, Requests):
 
         self.Requests = Requests
 
@@ -17,10 +16,10 @@ class Coregame:
             if self.response.get("errorCode") == "RESOURCE_NOT_FOUND":
                 return 0
             match_id = self.response['MatchID']
-            self.log(f"retrieved coregame match id: '{match_id}'")
+            print(f"retrieved coregame match id: '{match_id}'")
             return match_id
         except (KeyError, TypeError):
-            self.log(f"cannot find coregame match id: ")
+            print(f"cannot find coregame match id: ")
             # print(f"No match id found. {self.response}")
             time.sleep(5)
             try:
@@ -28,10 +27,10 @@ class Coregame:
                                                     endpoint=f"/core-game/v1/players/{self.Requests.puuid}",
                                                     method="get")
                 match_id = self.response['MatchID']
-                self.log(f"retrieved coregame match id: '{match_id}'")
+                print(f"retrieved coregame match id: '{match_id}'")
                 return match_id
             except (KeyError, TypeError):
-                self.log(f"cannot find coregame match id: ")
+                print(f"cannot find coregame match id: ")
                 print(f"No match id found. {self.response}")
             return 0
 
