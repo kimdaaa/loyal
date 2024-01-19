@@ -9,21 +9,13 @@ from States.menu import Menu
 from States.pregame import Pregame
 from utils import utilities
 from presence import Presences
-import customtkinter
 system('cls') 
 system(f"title Loyal v1")
 
-Requests = Requests()
-presences = Presences(Requests,)
-content = Content(Requests)
-Pregame = Pregame(Requests)
-menu = Menu(Requests, presences)
-coregame = Coregame(Requests)
-utilities = utilities(Requests)
+
 
 from pathlib import Path
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage
-from tkinter import scrolledtext
 import tkinter as tk
 import sys
 from PIL import Image, ImageTk
@@ -73,9 +65,14 @@ def create_rounded_rectangle(canvas, x1, y1, x2, y2, radius, **kwargs):
 window = Tk()
 
 window.geometry("800x389")
+
 window.configure(bg = "#1A181B")
+
+#title 
 window.title("Loyal V1")
+
 window.resizable(False, False)
+
 # Set the path to the ICO file
 ico_path = relative_to_assets('icon.ico')
 
@@ -122,7 +119,6 @@ button_1 = Button(
     highlightthickness=0,
     command= Dodge ,
     relief="flat",
-    text="start queue"
 )
 button_1.place(
     x=630.0,
@@ -236,17 +232,13 @@ canvas.create_rectangle(
     outline="")
 
 
-entry_bg_1 = canvas.create_image(
-    324.5,
-    322.5,
+
     
-)
 entry_1 = Text(
     bd=2,
     bg="#000716",
     fg="#3E5D65",
     highlightthickness=0,
-    state=tk.DISABLED
 
 )
 entry_1.place(
@@ -260,5 +252,11 @@ sys.stdout = TextRedirector(entry_1)
 
 window.mainloop()
 
-
+Requests = Requests()
+presences = Presences(Requests,)
+content = Content(Requests)
+Pregame = Pregame(Requests)
+menu = Menu(Requests, presences)
+coregame = Coregame(Requests)
+utilities = utilities(Requests)
 #figd_AiXeu6V-xyMyEBY1lpCMcw40OYi0MBpXPZuPiepx

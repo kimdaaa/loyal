@@ -17,7 +17,7 @@ class Requests:
         self.region = self.region[0]
         self.headers = {}
 
-        self.puuid = '9783a546-2a5d-53ec-bd8f-a46d311425e0'
+  
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         #fetch puuid so its avaible outside
         if not self.get_headers(init=True):
