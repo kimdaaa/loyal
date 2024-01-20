@@ -6,8 +6,10 @@ class utilities:
         Dodge = self.Request.fetch(url_type= 'glz', endpoint=f"/pregame/v1/matches/{match_id}/quit", method="post")
         return Dodge
     def Queue(self, party_id):
-        queue = self.Request.fetch(url_type= 'glz', endpoint=  f"/parties/v1/parties/{party_id}/matchmaking/join", method="post")
-        return queue
+    
+      #  type = self.Request.fetch('glz', f'parties/v1/parties/{party_id}/makedefault?queueID=competitive', 'post')
+        queu = self.Request.fetch(url_type= 'glz', endpoint=  f"/parties/v1/parties/{party_id}/matchmaking/join", method="post")
+        return queu
     
 
 

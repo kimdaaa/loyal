@@ -23,8 +23,6 @@ utilities = utilities(Requests)
 
 heartbeat_data = {
     "time": int(time.time()),
-    "state": game_state,
-    "mode": gamemode,
     "puuid": Requests.puuid,
     "players": {}
             }

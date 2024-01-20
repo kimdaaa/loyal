@@ -9,10 +9,17 @@ from States.menu import Menu
 from States.pregame import Pregame
 from utils import utilities
 from presence import Presences
+import time
 system('cls') 
 system(f"title Loyal v1")
 
-
+Requests = Requests()
+presences = Presences(Requests,)
+content = Content(Requests)
+Pregame = Pregame(Requests)
+menu = Menu(Requests, presences)
+coregame = Coregame(Requests)
+utilities = utilities(Requests)
 
 from pathlib import Path
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage
@@ -22,6 +29,16 @@ from PIL import Image, ImageTk
 
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"C:\Users\i fucking hate windo\Desktop\Ur mum\frame0")
+
+
+
+
+heartbeat_data = {
+    "time": int(time.time()),
+    "puuid": Requests.puuid,
+    "players": {}
+            }
+
 
 class TextRedirector:
     def __init__(self, text_widget):
@@ -92,7 +109,7 @@ def Dodge():
     print('[+] Game has been dodge lil ninja')
     utilities.dodge(a) 
 def start_queue():
-    a = menu.get_party_id()
+    a = menu.get_party_id(puuid=Requests.puuid)
     utilities.Queue(a)
     print('[+] queue has started retard')
 
@@ -252,11 +269,5 @@ sys.stdout = TextRedirector(entry_1)
 
 window.mainloop()
 
-Requests = Requests()
-presences = Presences(Requests,)
-content = Content(Requests)
-Pregame = Pregame(Requests)
-menu = Menu(Requests, presences)
-coregame = Coregame(Requests)
-utilities = utilities(Requests)
+
 #figd_AiXeu6V-xyMyEBY1lpCMcw40OYi0MBpXPZuPiepx
