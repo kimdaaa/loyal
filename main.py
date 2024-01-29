@@ -40,6 +40,7 @@ heartbeat_data = {
             }
 
 
+
 class TextRedirector:
     def __init__(self, text_widget):
         self.text_widget = text_widget
@@ -50,28 +51,18 @@ class TextRedirector:
 
 def relative_to_assets(path: str) -> Path:
     return ASSETS_PATH / Path(path)
-
 def create_rounded_rectangle(canvas, x1, y1, x2, y2, radius, **kwargs):
     """Create a rounded rectangle on the canvas."""
     return canvas.create_polygon(
         x1 + radius, y1,
-        x1 + radius, y1,
-        x2 - radius, y1,
         x2 - radius, y1,
         x2, y1,
         x2, y1 + radius,
-        x2, y1 + radius,
-        x2, y2 - radius,
         x2, y2 - radius,
         x2, y2,
         x2 - radius, y2,
-        x2 - radius, y2,
         x1 + radius, y2,
-        x1 + radius, y2,
-        x1, y2,
         x1, y2 - radius,
-        x1, y2 - radius,
-        x1, y1 + radius,
         x1, y1 + radius,
         x1, y1,
         x1 + radius, y1,
@@ -80,54 +71,274 @@ def create_rounded_rectangle(canvas, x1, y1, x2, y2, radius, **kwargs):
     )
 
 window = Tk()
-
-window.geometry("800x389")
-
+window.geometry("770x389")
 window.configure(bg = "#1A181B")
-
-#title 
 window.title("Loyal V1")
-
 window.resizable(False, False)
-
-# Set the path to the ICO file
 ico_path = relative_to_assets('icon.ico')
-
-# Convert the ICO file to a GIF file using Pillow
 gif_path = ico_path.with_suffix('.gif')
 Image.open(ico_path).save(gif_path)
-
-# Create a PhotoImage object for the window icon
 icon_image = ImageTk.PhotoImage(file=gif_path)
-
-# Set the window icon
 window.iconphoto(True, icon_image)
 
 
 def Dodge():
     a = Pregame.get_pregame_match_id()
-    print('[+] Game has been dodge lil ninja')
+    print('[+] Game has been dodge lil NIGGER')
     utilities.dodge(a) 
+    
 def start_queue():
     a = menu.get_party_id(puuid=Requests.puuid)
     utilities.Queue(a)
     print('[+] queue has started retard')
 
+def soloexP():
+    print("[!] Timer (5.5s)")
+    time.sleep(5.5)
+    b = Pregame.Hover()
+    print(b)
+
 canvas = Canvas(
     window,
     bg = "#1A181B",
     height = 389,
-    width = 800,
+    width = 770,
     bd = 0,
     highlightthickness = 0,
     relief = "ridge"
 )
 
 canvas.place(x = 0, y = 0)
-rounded_rectangle = create_rounded_rectangle(canvas, 10, 10, 790, 379, 20,
-                                              fill="#000000",
-                                                outline="")
+rounded_rectangle = create_rounded_rectangle(canvas, 10, 10, 760, 379, 20, fill="#000000", outline="")
 
+#boxes for data
+canvas.create_rectangle(
+    340.0,
+    60.0,
+    440.0,
+    254.0,
+    fill="#b0afb4",
+    outline="")
+
+canvas.create_rectangle(
+    492.0,
+    61.0,
+    592.0,
+    256.0,
+    fill="#b0afb4",
+    outline="")
+
+canvas.create_rectangle(
+    640.0,
+    61.0,
+    740.0,
+    256.0,
+    fill="#b0afb4",
+    outline="")
+
+canvas.create_rectangle(
+    41.0,
+    60.0,
+    141.0,
+    254.0,
+    fill="#b0afb4",
+    outline="")
+
+canvas.create_rectangle(
+    189.0,
+    60.0,
+    289.0,
+    254.5,
+    fill="#b0afb4",
+    outline="")
+
+
+
+
+#lines
+canvas.create_rectangle(
+    615.0,
+    50,
+    616.0,
+    379.0,
+    fill="#53d07a",
+    outline="")
+
+canvas.create_rectangle(
+    164.0,
+    50,
+    165.0,
+    267.0,
+    fill="#53d07a",
+    outline="")
+
+canvas.create_rectangle(
+    10,
+    50.0,
+    760.0,
+    50.0,
+    fill="#53d07a",
+    outline="")
+
+canvas.create_rectangle(
+    315.0,
+    50,
+    316.0,
+    267.0,
+    fill="#53d07a",
+    outline="")
+canvas.create_rectangle(
+    464.0,
+    50.0,
+    465.5,
+    266.9999694824219,
+    fill="#53d07a",
+    outline="")    
+entry_1 = Text(
+    bd=2,
+    bg="#000716",
+    fg="#3E5D65",
+    highlightthickness=0,
+
+)
+entry_1.place(
+    x=39.0,
+    y=267.0,
+    width=571.0,
+    height=109.0
+)
+
+
+#ign boxes
+canvas.create_rectangle(
+    30.0,
+    10.0,
+    150.0,
+    40.0,
+    fill="#5e859b",
+    outline="")
+
+canvas.create_rectangle(
+    180.0,
+    10.0,
+    300.0,
+    40.0,
+    fill="#5e859b",
+    outline="")
+
+canvas.create_rectangle(
+    331.0,
+    10.0,
+    451.0,
+    40.0,
+    fill="#5e859b",
+    outline="")
+
+canvas.create_rectangle(
+    482.0,
+    10.0,
+    602.0,
+    40.0,
+    fill="#5e859b",
+    outline="")
+
+canvas.create_rectangle(
+    630.0,
+    10.0,
+    750.0,
+    40.0,
+    fill="#5e859b",
+    outline="")
+
+canvas.create_text(
+    30.0,
+    10.0,
+    anchor="nw",
+    text="tt",
+    fill="#FFFFFF",
+    font=("Inter", 12 * -1)
+)
+
+canvas.create_text(
+    180.0,
+    10.0,
+    anchor="nw",
+    text="tt",
+    fill="#FFFFFF",
+    font=("Inter", 12 * -1)
+)
+
+canvas.create_text(
+    630.0,
+    9.0,
+    anchor="nw",
+    text="tt",
+    fill="#1A181B",
+    font=("Inter", 12 * -1)
+)
+
+canvas.create_text(
+    331.0,
+    10.0,
+    anchor="nw",
+    text="tt",
+    fill="#1A181B",
+    font=("Inter", 12 * -1)
+)
+
+canvas.create_text(
+    482.0,
+    10.0,
+    anchor="nw",
+    text="tt",
+    fill="#1A181B",
+    font=("Inter", 12 * -1)
+)
+
+canvas.create_text(
+    492.0,
+    61.0,
+    anchor="nw",
+    text="t",
+    fill="#000000",
+    font=("Inter", 12 * -1)
+)
+
+canvas.create_text(
+    42.0,
+    59.0,
+    anchor="nw",
+    text="tRT",
+    fill="#1A181B",
+    font=("Inter", 12 * -1)
+)
+
+canvas.create_text(
+    640.0,
+    61.0,
+    anchor="nw",
+    text="tWT",
+    fill="#000000",
+    font=("Inter", 12 * -1)
+)
+
+canvas.create_text(
+    340.0,
+    60.0,
+    anchor="nw",
+    text="tTVBRasdasdadsasdasdadadsdaaaaaaaaaaaaaaaaa",
+    fill="#000000",
+    font=("Inter", 12 * -1)
+)
+
+canvas.create_text(
+    189.0,
+    60.0,
+    anchor="nw",
+    text="tASD",
+    fill="#000000",
+    font=("Inter", 12 * -1)
+)
 button_image_1 = PhotoImage(
     file=relative_to_assets("button_1.png"))
 button_1 = Button(
@@ -138,7 +349,7 @@ button_1 = Button(
     relief="flat",
 )
 button_1.place(
-    x=630.0,
+    x=625.0,
     y=304.0,
     width=131.0,
     height=37.0
@@ -154,7 +365,7 @@ button_2 = Button(
     relief="flat"
 )
 button_2.place(
-    x=630.0,
+    x=625.0,
     y=267.0,
     width=131.0,
     height=37.0
@@ -166,105 +377,19 @@ button_3 = Button(
     image=button_image_3,
     borderwidth=0,
     highlightthickness=0,
-    command=lambda: print("button_3 clicked"),
+    command=soloexP,
     relief="flat"
 )
 button_3.place(
-    x=630.0,
+    x=625.0,
     y=341.0,
     width=131.0,
     height=37.0
 )
 
-image_image_1 = PhotoImage(
-    file=relative_to_assets("image_1.png"))
-image_1 = canvas.create_image(
-    91.0,
-    83.0,
-    image=image_image_1
-)
-
-image_image_2 = PhotoImage(
-    file=relative_to_assets("image_2.png"))
-image_2 = canvas.create_image(
-    537.0,
-    83.0,
-    image=image_image_2
-)
-
-image_image_3 = PhotoImage(
-    file=relative_to_assets("image_3.png"))
-image_3 = canvas.create_image(
-    684.0,
-    83.0,
-    image=image_image_3
-)
-
-image_image_4 = PhotoImage(
-    file=relative_to_assets("image_4.png"))
-image_4 = canvas.create_image(
-    243.0,
-    83.0,
-    image=image_image_4
-)
-
-image_image_5 = PhotoImage(
-    file=relative_to_assets("image_5.png"))
-image_5 = canvas.create_image(
-    390.0,
-    83.0,
-    image=image_image_5
-)
-
-canvas.create_rectangle(
-    463.0,
-    2.0,
-    464.0,
-    270.0,
-    fill="#FFFFFF",
-    outline="")
-
-canvas.create_rectangle(
-    315.0,
-    -1.0,
-    316.0,
-    267.0,
-    fill="#FFFFFF",
-    outline="")
-
-canvas.create_rectangle(
-    164.0,
-    5.0,
-    165.0,
-    273.0,
-    fill="#FFFFFF",
-    outline="")
-
-canvas.create_rectangle(
-    609.5,
-    -1.0,
-    610.5,
-    267.0,
-    fill="#FFFFFF",
-    outline="")
 
 
-
-    
-entry_1 = Text(
-    bd=2,
-    bg="#000716",
-    fg="#3E5D65",
-    highlightthickness=0,
-
-)
-entry_1.place(
-    x=39.0,
-    y=267.0,
-    width=571.0,
-    height=109.0
-)
-sys.stdout = TextRedirector(entry_1)
+#sys.stdout = TextRedirector(entry_1)
 
 
 window.mainloop()

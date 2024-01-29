@@ -9,6 +9,7 @@ from States.menu import Menu
 from States.pregame import Pregame
 from utils import utilities
 from presence import Presences
+import time
 system('cls') 
 system(f"title Loyal v1")
 
@@ -26,3 +27,8 @@ heartbeat_data = {
     "puuid": Requests.puuid,
     "players": {}
             }
+puuid = Requests.puuid
+party_id = menu.get_party_id(puuid)
+response = Requests.fetch('glz', f'/session/v1/sessions/{puuid}', 'get')
+
+print(response)

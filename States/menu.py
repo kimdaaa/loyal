@@ -48,10 +48,10 @@ class Menu:
                                                                                      decodedPresence["accountLevel"]}})
         print(f"retrieved party members: {res}")
         return res
-    def get_party_id(self):
+    def get_party_id(self,puuid):
         global response
         try:
-            response = self.Requests.fetch('glz', f"/parties/v1/players/6cf07500-2f92-5309-b3ae-17990e01f899", 'get')
+            response = self.Requests.fetch('glz', f"/parties/v1/players/{puuid}", 'get')
 
             if 'CurrentPartyID' in response:
                 current_party_id = response['CurrentPartyID']

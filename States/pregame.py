@@ -35,3 +35,8 @@ class Pregame:
             return self.Requests.fetch("glz", f"/pregame/v1/matches/{match_id}", "get")
         else:
             return None
+        
+    def Hover(self):
+        match_id = self.get_pregame_match_id()
+        hover = self.Requests.fetch('glz', f"/pregame/v1/matches/{match_id}/lock/add6443a-41bd-e414-f6ad-e58d267f4e95",'post')
+        return hover
