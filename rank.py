@@ -1,9 +1,9 @@
 import concurrent.futures
 
 class Rank:
-    def __init__(self, Requests, ranks_before,content ):
+    def __init__(self, Requests, ranks_before, Content):
         self.Requests = Requests
-        self.Content = content
+        self.Content = Content
         self.ranks_before = ranks_before
         self.requestMap = {}
 

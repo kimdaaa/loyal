@@ -1,4 +1,5 @@
 from os import system
+import os
 from player_stats import PlayerStats
 from rank import Rank
 from rpc import Rpc
@@ -7,392 +8,320 @@ from Request1 import Requests
 from States.coregame import Coregame
 from States.menu import Menu
 from States.pregame import Pregame
+from names import Names
 from utils import utilities
 from presence import Presences
+import stats
+import urllib3
 import time
-system('cls') 
-system(f"title Loyal v1")
-
-Requests = Requests()
-presences = Presences(Requests,)
-content = Content(Requests)
-Pregame = Pregame(Requests)
-menu = Menu(Requests, presences)
-coregame = Coregame(Requests)
-utilities = utilities(Requests)
-
 from pathlib import Path
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage
 import tkinter as tk
 import sys
 from PIL import Image, ImageTk
 
-OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"C:\Users\i fucking hate windo\Desktop\Ur mum\frame0")
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+class ValorantRankYoinker:
+    def __init__(self):
+        self.first_time = True
+        self.last_game_state = ""
+        self.log = self.logging.log
+        self.chat_log = self.chat_logging.chatLog
+        self.presences = Presences(Requests, self.log)
+        self.content = Content(Requests, self.log)
+        self.rank = Rank(Requests, self.log, self.content, before_ascendant_seasons)
+        self.pstats = PlayerStats(Requests, self.log, self.cfg)
+        self.names = Names(Requests, self.log)
+        self.coregame = Coregame(Requests, self.log)
+        self.menu = Menu(Requests, self.log, self.presences)
+        self.pregame = Pregame(Requests, self.log)
+        self.rpc = Rpc(map_urls, gamemodes, Colors(hide_names, self.content.get_all_agents(), AGENTCOLORLIST), self.log) if self.cfg.get_feature_flag("discord_rpc") else None
+
+    def main_loop(self):
+        while True:
+            try:
+                presence = self.presences.get_presence()
+                game_state = self.get_game_state(presence)
+                if game_state:
+                    self.log(f"Game state: {game_state}")
+                    if game_state == "INGAME":
+                        self.handle_ingame_state()
+                    elif game_state == "PREGAME":
+                        self.handle_pregame_state()
+                    elif game_state == "MENUS":
+                        self.handle_menus_state()
+            except KeyboardInterrupt:
+                os._exit(0)
+            except Exception as e:
+                self.handle_exception(e)
+
+    def get_game_state(self, presence):
+        if self.first_time:
+            while True:
+                presence = self.presences.get_presence()
+                if self.presences.get_private_presence(presence):
+                    break
+                time.sleep(5)
+            if self.cfg.get_feature_flag("discord_rpc"):
+                self.rpc.set_rpc(self.presences.get_private_presence(presence))
+            game_state = self.presences.get_game_state(presence)
+            self.first_time = False
+        else:
+            game_state = self.presences.get_game_state(presence)
+        return game_state
+
+    def handle_ingame_state(self):
+        coregame_stats = self.coregame.get_coregame_stats()
+        if not coregame_stats:
+            return
+
+        Players = coregame_stats["Players"]
+        presence = self.presences.get_presence()
+        partyMembersList = [a["Subject"] for a in self.menu.get_party_members(Requests.puuid, presence)]
+        players_data = {"ignore": partyMembersList}
+
+        for player in Players:
+            players_data.update({player["Subject"]: {"team": player["TeamID"], "agent": player["CharacterID"], "streamer_mode": player["PlayerIdentity"]["Incognito"]}})
+        
+        try:
+            server = GAMEPODS[coregame_stats["GamePodID"]]
+        except KeyError:
+            server = "New server"
+        
+        self.presences.wait_for_presence(self.names.get_players_puuid(Players))
+        names = self.names.get_names_from_puuids(Players)
+        loadouts_arr = Loadouts(Requests, self.log, Colors(hide_names, self.content.get_all_agents(), AGENTCOLORLIST), server, self.coregame.get_current_map()).get_match_loadouts(self.coregame.get_coregame_match_id(), Players, self.cfg.weapon, requests.get("https://valorant-api.com/v1/weapons/skins").json(), names, state="game")
+        loadouts = loadouts_arr[0]
+        loadouts_data = loadouts_arr[1]
+
+        playersLoaded = 1
+        with self.console.status("Loading Players...") as status:
+            partyOBJ = self.menu.get_party_json(self.names.get_players_puuid(Players), presence)
+            Players.sort(key=lambda Players: Players["PlayerIdentity"].get("AccountLevel"), reverse=True)
+            Players.sort(key=lambda Players: Players["TeamID"], reverse=True)
+            partyCount = 0
+            partyIcons = {}
+            lastTeamBoolean = False
+            lastTeam = "Red"
+            already_played_with = []
+            stats_data = self.pstats.read_data()
+
+            for p in Players:
+                if p["Subject"] == Requests.puuid:
+                    allyTeam = p["TeamID"]
+            for player in Players:
+                status.update(f"Loading players... [{playersLoaded}/{len(Players)}]")
+                playersLoaded += 1
+
+                if player["Subject"] in stats_data.keys():
+                    if player["Subject"] != Requests.puuid and player["Subject"] not in partyMembersList:
+                        curr_player_stat = stats_data[player["Subject"]][-1]
+                        i = 1
+                        while curr_player_stat["match_id"] == self.coregame.match_id and len(stats_data[player["Subject"]]) > i:
+                            i += 1
+                        curr_player_stat = stats_data[player["Subject"]][-i]
+                        if curr_player_stat["match_id"] != self.coregame.match_id:
+                            times = 0
+                            m_set = ()
+                            for m in stats_data[player["Subject"]]:
+                                if m["match_id"] != self.coregame.match_id and m["match_id"] not in m_set:
+                                    times += 1
+                                    m_set += (m["match_id"],)
+                            if not player["PlayerIdentity"]["Incognito"]:
+                                already_played_with.append({
+                                    "times": times,
+                                    "name": curr_player_stat["name"],
+                                    "agent": curr_player_stat["agent"],
+                                    "time_diff": time.time() - curr_player_stat["epoch"]
+                                })
+                            else:
+                                team_string = "your" if player["TeamID"] == allyTeam else "enemy"
+                                already_played_with.append({
+                                    "times": times,
+                                    "name": Colors(hide_names, self.content.get_all_agents(), AGENTCOLORLIST).escape_ansi(agent_dict[player["CharacterID"].lower()]) + " on " + team_string + " team",
+                                    "agent": curr_player_stat["agent"],
+                                    "time_diff": time.time() - curr_player_stat["epoch"]
+                                })
+
+                party_icon = ''
+                if player["Subject"] == Requests.puuid:
+                    if self.cfg.get_feature_flag("discord_rpc"):
+                        self.rpc.set_data({"rank": playerRank["rank"], "rank_name": Colors(hide_names, self.content.get_all_agents(), AGENTCOLORLIST).escape_ansi(NUMBERTORANKS[playerRank["rank"]]) + " | " + str(playerRank["rr"]) + "rr"})
+                
+                ppstats = self.pstats.get_stats(player["Subject"])
+                hs = ppstats["hs"]
+                kd = ppstats["kd"]
+                player_level = player["PlayerIdentity"].get("AccountLevel")
+
+                if player["PlayerIdentity"]["Incognito"]:
+                    Namecolor = Colors(hide_names, self.content.get_all_agents(), AGENTCOLORLIST).get_color_from_team(player["TeamID"], names[player["Subject"]], player["Subject"], Requests.puuid, agent=player["CharacterID"], party_members=partyMembersList)
+                else:
+                    Namecolor = Colors(hide_names, self.content.get_all_agents(), AGENTCOLORLIST).get_color_from_team(player["TeamID"], names[player["Subject"]], player["Subject"], Requests.puuid, party_members=partyMembersList)
+
+                if lastTeam != player["TeamID"]:
+                    lastTeamBoolean = True
+                lastTeam = player['TeamID']
+                if player["PlayerIdentity"]["HideAccountLevel"]:
+                    PLcolor = Colors(hide_names, self.content.get_all_agents(), AGENTCOLORLIST).level_to_color(player_level) if player["Subject"] == Requests.puuid or player["Subject"] in partyMembersList or hide_levels == False else ""
+                else:
+                    PLcolor = Colors(hide_names, self.content.get_all_agents(), AGENTCOLORLIST).level_to_color(player_level)
+
+                agent = Colors(hide_names, self.content.get_all_agents(), AGENTCOLORLIST).get_agent_from_uuid(player["CharacterID"].lower())
+                name = Namecolor
+                skin = loadouts[player["Subject"]]
+                rankName = NUMBERTORANKS[playerRank["rank"]]
+                if self.cfg.get_feature_flag("aggregate_rank_rr") and self.cfg.table.get("rr"):
+                    rankName += f" ({playerRank['rr']})"
+                rr = playerRank["rr"]
+                peakRankAct = f" (e{playerRank['peakrankep']}a{playerRank['peakrankact']})"
+                if not self.cfg.get_feature_flag("peak_rank_act"):
+                    peakRankAct = ""
+                peakRank = NUMBERTORANKS[playerRank["peakrank"]] + peakRankAct
+                previousRank = NUMBERTORANKS[previousPlayerRank["rank"]]
+                leaderboard = playerRank["leaderboard"]
+                hs = Colors(hide_names, self.content.get_all_agents(), AGENTCOLORLIST).get_hs_gradient(hs)
+                wr = Colors(hide_names, self.content.get_all_agents(), AGENTCOLORLIST).get_wr_gradient(playerRank["wr"]) + f" ({playerRank['numberofgames']})"
+
+                self.pstats.save_data({
+                    player["Subject"]: {
+                        "name": names[player["Subject"]],
+                        "agent": agent_dict[player["CharacterID"].lower()],
+                        "map": self.coregame.get_current_map(map_urls, map_splashes),
+                        "rank": playerRank["rank"],
+                        "rr": rr,
+                        "match_id": self.coregame.match_id,
+                        "epoch": time.time(),
+                    }
+                })
+        
+        if self.cfg.get_feature_flag("last_played"):
+            if len(already_played_with) > 0:
+                for played in already_played_with:
+                    self.console.print(f"Already played with {played['name']} (last {played['agent']}) {self.pstats.convert_time(played['time_diff'])} ago. (Total played {played['times']} times)")
+                    self.chat_log(f"Already played with {played['name']} (last {played['agent']}) {self.pstats.convert_time(played['time_diff'])} ago. (Total played {played['times']} times)")
+            already_played_with = []
+
+    def handle_pregame_state(self):
+        pregame_stats = self.pregame.get_pregame_stats()
+        if not pregame_stats:
+            return
+
+        Players = pregame_stats["AllyTeam"]["Players"]
+        self.presences.wait_for_presence(self.names.get_players_puuid(Players))
+        names = self.names.get_names_from_puuids(Players)
+        playersLoaded = 1
+
+        with self.console.status("Loading Players...") as status:
+            presence = self.presences.get_presence()
+            partyOBJ = self.menu.get_party_json(self.names.get_players_puuid(Players), presence)
+            partyMembersList = [a["Subject"] for a in self.menu.get_party_members(Requests.puuid, presence)]
+            Players.sort(key=lambda Players: Players["PlayerIdentity"].get("AccountLevel"), reverse=True)
+            partyCount = 0
+            partyIcons = {}
+
+            for player in Players:
+                status.update(f"Loading players... [{playersLoaded}/{len(Players)}]")
+                playersLoaded += 1
+
+                party_icon = ''
+                for party in partyOBJ:
+                    if player["Subject"] in partyOBJ[party]:
+                        if party not in partyIcons:
+                            partyIcons.update({party: PARTYICONLIST[partyCount]})
+                            party_icon = PARTYICONLIST[partyCount]
+                            partyNum = partyCount + 1
+                        else:
+                            party_icon = partyIcons[party]
+                        partyCount += 1
+                playerRank = self.rank.get_rank(player["Subject"], seasonID)
+                previousPlayerRank = self.rank.get_rank(player["Subject"], previousSeasonID)
+
+                if player["Subject"] == Requests.puuid:
+                    if self.cfg.get_feature_flag("discord_rpc"):
+                        self.rpc.set_data({"rank": playerRank["rank"], "rank_name": Colors(hide_names, self.content.get_all_agents(), AGENTCOLORLIST).escape_ansi(NUMBERTORANKS[playerRank["rank"]]) + " | " + str(playerRank["rr"]) + "rr"})
+                
+                ppstats = self.pstats.get_stats(player["Subject"])
+                hs = ppstats["hs"]
+                kd = ppstats["kd"]
+                player_level = player["PlayerIdentity"].get("AccountLevel")
+
+                if player["PlayerIdentity"]["Incognito"]:
+                    NameColor = Colors(hide_names, self.content.get_all_agents(), AGENTCOLORLIST).get_color_from_team(pregame_stats['Teams'][0]['TeamID'], names[player["Subject"]], player["Subject"], Requests.puuid, agent=player["CharacterID"], party_members=partyMembersList)
+                else:
+                    NameColor = Colors(hide_names, self.content.get_all_agents(), AGENTCOLORLIST).get_color_from_team(pregame_stats['Teams'][0]['TeamID'], names[player["Subject"]], player["Subject"], Requests.puuid, party_members=partyMembersList)
+
+                if player["PlayerIdentity"]["HideAccountLevel"]:
+                    PLcolor = Colors(hide_names, self.content.get_all_agents(), AGENTCOLORLIST).level_to_color(player_level) if player["Subject"] == Requests.puuid or player["Subject"] in partyMembersList or hide_levels == False else ""
+                else:
+                    PLcolor = Colors(hide_names, self.content.get_all_agents(), AGENTCOLORLIST).level_to_color(player_level)
+                
+                if player["CharacterSelectionState"] == "locked":
+                    agent_color = color(str(agent_dict.get(player["CharacterID"].lower())), fore=(255, 255, 255))
+                elif player["CharacterSelectionState"] == "selected":
+                    agent_color = color(str(agent_dict.get(player["CharacterID"].lower())), fore=(128, 128, 128))
+                else:
+                    agent_color = color(str(agent_dict.get(player["CharacterID"].lower())), fore=(54, 53, 51))
+
+                agent = agent_color
+                name = NameColor
+                rankName = NUMBERTORANKS[playerRank["rank"]]
+                if self.cfg.get_feature_flag("aggregate_rank_rr") and self.cfg.table.get("rr"):
+                    rankName += f" ({playerRank['rr']})"
+                rr = playerRank["rr"]
+                peakRankAct = f" (e{playerRank['peakrankep']}a{playerRank['peakrankact']})"
+                if not self.cfg.get_feature_flag("peak_rank_act"):
+                    peakRankAct = ""
+                peakRank = NUMBERTORANKS[playerRank["peakrank"]] + peakRankAct
+                previousRank = NUMBERTORANKS[previousPlayerRank["rank"]]
+                leaderboard = playerRank["leaderboard"]
+                hs = Colors(hide_names, self.content.get_all_agents(), AGENTCOLORLIST).get_hs_gradient(hs)
+                wr = Colors(hide_names, self.content.get_all_agents(), AGENTCOLORLIST).get_wr_gradient(playerRank["wr"]) + f" ({playerRank['numberofgames']})"
+
+    def handle_menus_state(self):
+        Players = self.menu.get_party_members(Requests.puuid, self.presences.get_presence())
+        names = self.names.get_names_from_puuids(Players)
+        playersLoaded = 1
+
+        with self.console.status("Loading Players...") as status:
+            Players.sort(key=lambda Players: Players["PlayerIdentity"].get("AccountLevel"), reverse=True)
+            seen = []
+            for player in Players:
+                if player not in seen:
+                    status.update(f"Loading players... [{playersLoaded}/{len(Players)}]")
+                    playersLoaded += 1
+                    party_icon = PARTYICONLIST[0]
+                    playerRank = self.rank.get_rank(player["Subject"], seasonID)
+                    previousPlayerRank = self.rank.get_rank(player["Subject"], previousSeasonID)
+
+                    if player["Subject"] == Requests.puuid:
+                        if self.cfg.get_feature_flag("discord_rpc"):
+                            self.rpc.set_data({"rank": playerRank["rank"], "rank_name": Colors(hide_names, self.content.get_all_agents(), AGENTCOLORLIST).escape_ansi(NUMBERTORANKS[playerRank["rank"]]) + " | " + str(playerRank["rr"]) + "rr"})
+                    
+                    ppstats = self.pstats.get_stats(player["Subject"])
+                    hs = ppstats["hs"]
+                    kd = ppstats["kd"]
+                    player_level = player["PlayerIdentity"].get("AccountLevel")
+                    PLcolor = Colors(hide_names, self.content.get_all_agents(), AGENTCOLORLIST).level_to_color(player_level)
+
+                    agent = ""
+                    name = color(names[player["Subject"]], fore=(76, 151, 237))
+                    rankName = NUMBERTORANKS[playerRank["rank"]]
+                    if self.cfg.get_feature_flag("aggregate_rank_rr") and self.cfg.table.get("rr"):
+                        rankName += f" ({playerRank['rr']})"
+                    rr = playerRank["rr"]
+                    peakRankAct = f" (e{playerRank['peakrankep']}a{playerRank['peakrankact']})"
+                    if not self.cfg.get_feature_flag("peak_rank_act"):
+                        peakRankAct = ""
+                    peakRank = NUMBERTORANKS[playerRank["peakrank"]] + peakRankAct
+                    previousRank = NUMBERTORANKS[previousPlayerRank["rank"]]
+                    leaderboard = playerRank["leaderboard"]
+                    hs = Colors(hide_names, self.content.get_all_agents(), AGENTCOLORLIST).get_hs_gradient(hs)
+                    wr = Colors(hide_names, self.content.get_all_agents(), AGENTCOLORLIST).get_wr_gradient(playerRank["wr"]) + f" ({playerRank['numberofgames']})"
+
+                    seen.append(player["Subject"])
 
 
-
-
-heartbeat_data = {
-    "time": int(time.time()),
-    "puuid": Requests.puuid,
-    "players": {}
-            }
-
-
-
-class TextRedirector:
-    def __init__(self, text_widget):
-        self.text_widget = text_widget
-
-    def write(self, text):
-        self.text_widget.insert(tk.END, text)
-        self.text_widget.see(tk.END)
-
-def relative_to_assets(path: str) -> Path:
-    return ASSETS_PATH / Path(path)
-def create_rounded_rectangle(canvas, x1, y1, x2, y2, radius, **kwargs):
-    """Create a rounded rectangle on the canvas."""
-    return canvas.create_polygon(
-        x1 + radius, y1,
-        x2 - radius, y1,
-        x2, y1,
-        x2, y1 + radius,
-        x2, y2 - radius,
-        x2, y2,
-        x2 - radius, y2,
-        x1 + radius, y2,
-        x1, y2 - radius,
-        x1, y1 + radius,
-        x1, y1,
-        x1 + radius, y1,
-        smooth=True,
-        **kwargs
-    )
-
-window = Tk()
-window.geometry("770x389")
-window.configure(bg = "#1A181B")
-window.title("Loyal V1")
-window.resizable(False, False)
-ico_path = relative_to_assets('icon.ico')
-gif_path = ico_path.with_suffix('.gif')
-Image.open(ico_path).save(gif_path)
-icon_image = ImageTk.PhotoImage(file=gif_path)
-window.iconphoto(True, icon_image)
-
-
-def Dodge():
-    a = Pregame.get_pregame_match_id()
-    print('[+] Game has been dodge lil NIGGER')
-    utilities.dodge(a) 
-    
-def start_queue():
-    a = menu.get_party_id(puuid=Requests.puuid)
-    utilities.Queue(a)
-    print('[+] queue has started retard')
-
-def soloexP():
-    print("[!] Timer (5.5s)")
-    time.sleep(5.5)
-    b = Pregame.Hover()
-    print(b)
-
-canvas = Canvas(
-    window,
-    bg = "#1A181B",
-    height = 389,
-    width = 770,
-    bd = 0,
-    highlightthickness = 0,
-    relief = "ridge"
-)
-
-canvas.place(x = 0, y = 0)
-rounded_rectangle = create_rounded_rectangle(canvas, 10, 10, 760, 379, 20, fill="#000000", outline="")
-
-#boxes for data
-canvas.create_rectangle(
-    340.0,
-    60.0,
-    440.0,
-    254.0,
-    fill="#b0afb4",
-    outline="")
-
-canvas.create_rectangle(
-    492.0,
-    61.0,
-    592.0,
-    256.0,
-    fill="#b0afb4",
-    outline="")
-
-canvas.create_rectangle(
-    640.0,
-    61.0,
-    740.0,
-    256.0,
-    fill="#b0afb4",
-    outline="")
-
-canvas.create_rectangle(
-    41.0,
-    60.0,
-    141.0,
-    254.0,
-    fill="#b0afb4",
-    outline="")
-
-canvas.create_rectangle(
-    189.0,
-    60.0,
-    289.0,
-    254.5,
-    fill="#b0afb4",
-    outline="")
-
-
-
-
-#lines
-canvas.create_rectangle(
-    615.0,
-    50,
-    616.0,
-    379.0,
-    fill="#53d07a",
-    outline="")
-
-canvas.create_rectangle(
-    164.0,
-    50,
-    165.0,
-    267.0,
-    fill="#53d07a",
-    outline="")
-
-canvas.create_rectangle(
-    10,
-    50.0,
-    760.0,
-    50.0,
-    fill="#53d07a",
-    outline="")
-
-canvas.create_rectangle(
-    315.0,
-    50,
-    316.0,
-    267.0,
-    fill="#53d07a",
-    outline="")
-canvas.create_rectangle(
-    464.0,
-    50.0,
-    465.5,
-    266.9999694824219,
-    fill="#53d07a",
-    outline="")    
-entry_1 = Text(
-    bd=2,
-    bg="#000716",
-    fg="#3E5D65",
-    highlightthickness=0,
-
-)
-entry_1.place(
-    x=39.0,
-    y=267.0,
-    width=571.0,
-    height=109.0
-)
-
-
-#ign boxes
-canvas.create_rectangle(
-    30.0,
-    10.0,
-    150.0,
-    40.0,
-    fill="#5e859b",
-    outline="")
-
-canvas.create_rectangle(
-    180.0,
-    10.0,
-    300.0,
-    40.0,
-    fill="#5e859b",
-    outline="")
-
-canvas.create_rectangle(
-    331.0,
-    10.0,
-    451.0,
-    40.0,
-    fill="#5e859b",
-    outline="")
-
-canvas.create_rectangle(
-    482.0,
-    10.0,
-    602.0,
-    40.0,
-    fill="#5e859b",
-    outline="")
-
-canvas.create_rectangle(
-    630.0,
-    10.0,
-    750.0,
-    40.0,
-    fill="#5e859b",
-    outline="")
-
-canvas.create_text(
-    30.0,
-    10.0,
-    anchor="nw",
-    text="tt",
-    fill="#FFFFFF",
-    font=("Inter", 12 * -1)
-)
-
-canvas.create_text(
-    180.0,
-    10.0,
-    anchor="nw",
-    text="tt",
-    fill="#FFFFFF",
-    font=("Inter", 12 * -1)
-)
-
-canvas.create_text(
-    630.0,
-    9.0,
-    anchor="nw",
-    text="tt",
-    fill="#1A181B",
-    font=("Inter", 12 * -1)
-)
-
-canvas.create_text(
-    331.0,
-    10.0,
-    anchor="nw",
-    text="tt",
-    fill="#1A181B",
-    font=("Inter", 12 * -1)
-)
-
-canvas.create_text(
-    482.0,
-    10.0,
-    anchor="nw",
-    text="tt",
-    fill="#1A181B",
-    font=("Inter", 12 * -1)
-)
-
-canvas.create_text(
-    492.0,
-    61.0,
-    anchor="nw",
-    text="t",
-    fill="#000000",
-    font=("Inter", 12 * -1)
-)
-
-canvas.create_text(
-    42.0,
-    59.0,
-    anchor="nw",
-    text="tRT",
-    fill="#1A181B",
-    font=("Inter", 12 * -1)
-)
-
-canvas.create_text(
-    640.0,
-    61.0,
-    anchor="nw",
-    text="tWT",
-    fill="#000000",
-    font=("Inter", 12 * -1)
-)
-
-canvas.create_text(
-    340.0,
-    60.0,
-    anchor="nw",
-    text="tTVBRasdasdadsasdasdadadsdaaaaaaaaaaaaaaaaa",
-    fill="#000000",
-    font=("Inter", 12 * -1)
-)
-
-canvas.create_text(
-    189.0,
-    60.0,
-    anchor="nw",
-    text="tASD",
-    fill="#000000",
-    font=("Inter", 12 * -1)
-)
-button_image_1 = PhotoImage(
-    file=relative_to_assets("button_1.png"))
-button_1 = Button(
-    image=button_image_1,
-    borderwidth=0,
-    highlightthickness=0,
-    command= Dodge ,
-    relief="flat",
-)
-button_1.place(
-    x=625.0,
-    y=304.0,
-    width=131.0,
-    height=37.0
-)
-
-button_image_2 = PhotoImage(
-    file=relative_to_assets("button_2.png"))
-button_2 = Button(
-    image=button_image_2,
-    borderwidth=0,
-    highlightthickness=0,
-    command= start_queue,
-    relief="flat"
-)
-button_2.place(
-    x=625.0,
-    y=267.0,
-    width=131.0,
-    height=37.0
-)
-
-button_image_3 = PhotoImage(
-    file=relative_to_assets("button_3.png"))
-button_3 = Button(
-    image=button_image_3,
-    borderwidth=0,
-    highlightthickness=0,
-    command=soloexP,
-    relief="flat"
-)
-button_3.place(
-    x=625.0,
-    y=341.0,
-    width=131.0,
-    height=37.0
-)
-
-
-
-#sys.stdout = TextRedirector(entry_1)
-
-
-window.mainloop()
-
-
-#figd_AiXeu6V-xyMyEBY1lpCMcw40OYi0MBpXPZuPiepx
+if __name__ == "__main__":
+    valo_rank_yoinker = ValorantRankYoinker()
+    valo_rank_yoinker.start()

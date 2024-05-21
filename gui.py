@@ -31,4 +31,31 @@ puuid = Requests.puuid
 party_id = menu.get_party_id(puuid)
 response = Requests.fetch('glz', f'/session/v1/sessions/{puuid}', 'get')
 
-print(response)
+import tkinter as tk
+
+def main():
+    window = tk.Tk()
+    window.geometry("770x389")
+    window.title("Line Drawing Test")
+
+    canvas = tk.Canvas(window, height=400, width=800)
+    canvas.pack()
+
+    # Adjusting the use of create_line for drawing lines
+    line_positions = [
+        (615, 50, 615, 379),  # Line from (615, 50) to (615, 379)
+        (164, 50, 164, 267),  # Adjusted for uniform length
+        (315, 50, 315, 267),  # Adjusted for uniform length
+        (464, 50, 464, 267),  # Adjusted for uniform length
+        (10, 50, 760, 50),    # Horizontal line from (10, 50) to (760, 50)
+    ]
+    color = "#53d07a"  # Desired color for all lines
+
+    for line in line_positions:
+        # Create each line with specified color and width
+        canvas.create_line(*line, fill=color, width=2)
+
+    window.mainloop()
+
+if __name__ == "__main__":
+    main()
