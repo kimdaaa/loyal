@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LOYAL // MAGI</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="scan"></div>
+
+<div class="app" id="app">
+
+  <div class="chrome">
+    <div class="chrome-title"><span class="brand">LOYAL</span><span class="slash">//</span><span>MAGI</span></div>
+    <div class="chrome-actions"><button id="btn-min" aria-label="Minimize">&minus;</button><button id="btn-close" aria-label="Close">&times;</button></div>
+  </div>
+
+  <!-- ---------- rail ---------- -->
+  <div class="rail">
+    <span class="brand">LOYAL</span>
+    <span class="tick">MAGI-03</span>
+    <span class="sep"></span>
+    <span class="tick">SYNC 2.0s</span>
+    <span class="tick" id="tick-timer" hidden></span>
+    <span class="placard p-wait" id="placard">
+      <span class="d"></span><span id="placard-label">AWAITING RIOT CLIENT</span><span class="sm" id="placard-sub">NO BACKEND</span>
+    </span>
+  </div>
+
+  <!-- ---------- threat assessment ---------- -->
+  <div class="assess" id="assess">
+    <span class="cap"><b>THREAT ASSESSMENT</b> // <span id="assess-ctx">STANDBY</span></span>
+    <div class="bal">
+      <div class="bal-side">
+        <span class="bal-lab f">FRIENDLY MEAN</span>
+        <span class="bal-track"><i class="bal-fill" id="bal-f" style="width:0%"></i></span>
+        <span class="bal-num f" id="bal-f-lab">—</span>
+      </div>
+      <div class="bal-mid">
+        <div class="bal-verdict" id="bal-verdict">EVEN</div>
+        <div class="bal-delta" id="bal-delta">Δ 0.0 TIERS</div>
+      </div>
+      <div class="bal-side r">
+        <span class="bal-lab e">HOSTILE MEAN</span>
+        <span class="bal-track"><i class="bal-fill" id="bal-e" style="width:0%"></i></span>
+        <span class="bal-num e" id="bal-e-lab">—</span>
+      </div>
+    </div>
+    <div class="flagrail">
+      <span class="flagcount" id="flagcount">0 ▸</span>
+      <div class="flags" id="flags"></div>
+    </div>
+  </div>
+
+  <!-- ---------- teams ---------- -->
+  <div class="teams" id="teams">
+
+    <div class="side" id="side-friendly">
+      <div class="side-hd f"><span class="acc"></span><span class="t">FRIENDLY</span>
+        <span class="n" id="hd-friendly">STANDBY</span></div>
+      <div class="colhd"><span></span><span>OPERATOR</span><span style="text-align:center">RANK · RR</span>
+        <span>PEAK</span><span></span>
+        <span class="statgrid"><span>K/D</span><span>HS</span><span>WR</span><span>LVL</span></span></div>
+      <div class="rows" id="rows-friendly"></div>
+    </div>
+
+    <div class="spine" id="spine"></div>
+
+    <div class="side" id="side-hostile">
+      <div class="side-hd e"><span class="acc"></span><span class="t">HOSTILE</span>
+        <span class="n" id="hd-hostile">STANDBY</span></div>
+      <div class="colhd"><span></span><span>OPERATOR</span><span style="text-align:center">RANK · RR</span>
+        <span>PEAK</span><span></span>
+        <span class="statgrid"><span>K/D</span><span>HS</span><span>WR</span><span>LVL</span></span></div>
+      <div class="rows" id="rows-hostile"></div>
+    </div>
+
+  </div>
+
+  <!-- ---------- foot ---------- -->
+  <div class="foot">
+    <div class="ctl">
+      <select class="sel" id="agent-select"></select>
+      <button class="btn pri" id="btn-lock">LOCK</button>
+      <button class="btn" id="btn-refresh">REFRESH</button>
+      <button class="btn dgr" id="btn-dodge">DODGE</button>
+      <button class="btn" id="btn-queue">START QUEUE</button>
+    </div>
+    <div class="log" id="log"></div>
+  </div>
+
+</div>
+
+<!-- row template: cloned by app.js, never parsed from strings -->
+<template id="tpl-row">
+  <div class="row">
+    <span class="idcell"><span class="pchip solo"></span><img class="pic" alt=""></span>
+    <span class="cell">
+      <span class="l1">
+        <span class="nm"><span class="nmv"></span><span class="tag"></span></span>
+        <span class="tagx" hidden>⚠ SMURF</span>
+        <svg class="cross" viewBox="0 0 12 14" hidden><path d="M6 0Q6.6 3.5 7 4.6Q8.4 4.9 12 5Q8.4 5.4 7 5.7Q6.6 8.6 6 14Q5.4 8.6 5 5.7Q1.6 5.4 0 5Q1.6 4.9 5 4.6Q5.4 3.5 6 0Z"/></svg>
+        <span class="recn" hidden></span>
+      </span>
+      <span class="l2"><span class="sub"></span></span>
+    </span>
+    <span class="cell">
+      <span class="l1"><span class="pill"></span></span>
+      <span class="l2"><span class="meter"><i></i></span><span class="rr"><span class="rrv"></span><b>rr</b></span></span>
+    </span>
+    <span class="cell">
+      <span class="l1"><span class="peak"><span class="peakv"></span><span class="up" hidden></span></span></span>
+      <span class="l2"><span class="peakact"></span></span>
+    </span>
+    <span></span>
+    <span class="statgrid"><span class="stat"></span><span class="stat"></span><span class="stat"></span><span class="stat"></span></span>
+  </div>
+</template>
+
+<template id="tpl-ghost">
+  <div class="ghost">
+    <span class="gbox"></span>
+    <span class="gslot"><span class="glab">SLOT 00 · UNRESOLVED</span><span class="gline"></span></span>
+  </div>
+</template>
+
+<template id="tpl-cross">
+  <svg class="cross" viewBox="0 0 12 14"><path d="M6 0Q6.6 3.5 7 4.6Q8.4 4.9 12 5Q8.4 5.4 7 5.7Q6.6 8.6 6 14Q5.4 8.6 5 5.7Q1.6 5.4 0 5Q1.6 4.9 5 4.6Q5.4 3.5 6 0Z"/></svg>
+</template>
+
+<script src="app.js"></script>
+</body>
+</html>
+

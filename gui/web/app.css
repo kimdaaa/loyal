@@ -1,0 +1,246 @@
+/* ==========================================================================
+   LOYAL // MAGI — ported verbatim from the approved mockup (lobby-v5.html).
+   Only deltas vs the mockup:
+     - the preview chrome (.note / .fixes / .stage / .stagewrap) is gone
+     - .app fills the window instead of being a fixed 1600x640 box
+     - a small number of *additive* rules for states the mockup did not have to
+       express (hidden hostile side, hidden assessment, stale dimming, unranked
+       pill, debug log tone). Nothing that existed was retuned.
+   ========================================================================== */
+
+:root{
+  --void:#07080A; --panel:#0C0E11; --panel2:#11141A; --hair:#1C222A; --hair2:#141920;
+  --amber:#FF6B00; --amber-dim:#8A3D00; --amber-glow:rgba(255,107,0,.13);
+  --phos:#4AE39B; --alert:#FF2D3F; --blue:#6FA8DC; --blue-dim:#2E4C6B;
+  --ink:#E8E5DD; --ink2:#8B95A1; --ink3:#525C67;
+  --f-cond:'Bahnschrift','Archivo Narrow','Oswald','Segoe UI',sans-serif;
+  --f-mono:'Cascadia Mono','Consolas','SF Mono',monospace;
+
+  /* SPACING SCALE — everything is a multiple of 4. No magic numbers. */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px; --s6:24px;
+  --gut:16px;          /* single horizontal gutter, used by every band */
+  --colgap:16px;       /* gap between row columns */
+  --l1:20px;           /* baseline grid: primary line box */
+  --l2:14px;           /* baseline grid: secondary line box */
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--void);color:var(--ink);font-family:var(--f-cond);font-size:14px;
+  -webkit-font-smoothing:antialiased}
+html,body{width:100%;height:100%;overflow:hidden}
+[hidden]{display:none !important}
+.scan{position:fixed;inset:0;pointer-events:none;z-index:99;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.016) 0 1px,transparent 1px 3px)}
+
+.app{width:100%;height:100%;border:1px solid var(--hair);background:var(--panel);
+  position:relative;display:flex;flex-direction:column;overflow:hidden}
+.app::before,.app::after{content:'';position:absolute;width:9px;height:9px;
+  border:1px solid var(--amber-dim);z-index:5}
+.app::before{top:0;left:0;border-right:0;border-bottom:0}
+.app::after{bottom:0;right:0;border-left:0;border-top:0}
+
+.chrome{height:28px;flex:0 0 28px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 8px 0 var(--gut);background:#090B0E;border-bottom:1px solid var(--hair);
+  -webkit-app-region:drag;user-select:none}
+.chrome-title{display:flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:10px;
+  letter-spacing:.18em;color:var(--ink3)}
+.chrome-title .brand{font-size:11px;letter-spacing:.28em;color:var(--amber)}
+.chrome-title .slash{color:var(--hair)}
+.chrome-actions{display:flex;align-items:center;gap:4px;-webkit-app-region:no-drag}
+.chrome-actions button{width:34px;height:22px;border:1px solid transparent;background:transparent;color:var(--ink3);
+  font:14px/20px var(--f-mono);cursor:pointer}
+.chrome-actions button:hover{border-color:var(--amber-dim);color:var(--amber);background:var(--amber-glow)}
+#btn-close:hover{border-color:var(--alert);color:var(--alert);background:rgba(255,45,63,.09)}
+
+/* ---------- rail : 36 ---------- */
+.rail{display:flex;align-items:center;gap:var(--s4);padding:0 var(--gut);
+  height:36px;flex:0 0 36px;border-bottom:1px solid var(--hair);background:var(--panel2)}
+.brand{font-weight:700;font-size:13px;letter-spacing:.34em;color:var(--amber)}
+.tick{font-family:var(--f-mono);font-size:10px;color:var(--ink3);letter-spacing:.13em;
+  white-space:nowrap}
+.tick b{color:var(--amber);font-weight:400}
+.sep{flex:1}
+.placard{display:flex;align-items:center;gap:var(--s2);padding:var(--s1) var(--s3);
+  border:1px solid;font-size:10.5px;letter-spacing:.24em;font-weight:600;white-space:nowrap}
+.placard .d{width:6px;height:6px;flex:0 0 6px}
+.placard .sm{font-family:var(--f-mono);font-size:9px;letter-spacing:.1em;opacity:.65}
+.p-wait{border-color:var(--amber-dim);color:var(--amber);background:var(--amber-glow)}
+.p-wait .d{background:var(--amber);animation:brth 1.6s ease-in-out infinite}
+.p-menu{border-color:#25303A;color:var(--ink2);background:#0E1216}
+.p-menu .d{background:var(--ink3)}
+.p-pre{border-color:var(--amber-dim);color:var(--amber);background:var(--amber-glow);animation:fp 2.2s infinite}
+.p-pre .d{background:var(--amber);animation:bl 1s infinite}
+.p-live{border-color:#1E6B4A;color:var(--phos);background:rgba(74,227,155,.08)}
+.p-live .d{background:var(--phos);box-shadow:0 0 8px var(--phos);animation:bl 1.9s infinite}
+.p-off{border-color:#6B1220;color:var(--alert);background:rgba(255,45,63,.08)}
+.p-off .d{background:var(--alert)}
+@keyframes bl{0%,72%{opacity:1}82%,100%{opacity:.2}}
+@keyframes brth{0%,100%{opacity:.35}50%{opacity:1}}
+@keyframes fp{0%,100%{box-shadow:0 0 0 rgba(255,107,0,0)}50%{box-shadow:0 0 12px rgba(255,107,0,.25)}}
+
+/* ---------- assessment : 16 / 12 / 16 rhythm ---------- */
+.assess{flex:0 0 auto;border-bottom:1px solid var(--hair);padding:var(--s4) 0 var(--s4);
+  background:linear-gradient(180deg,rgba(255,107,0,.045),transparent)}
+.cap{font-size:10px;letter-spacing:.3em;color:var(--ink3);
+  margin:0 var(--gut) var(--s3);display:block;line-height:var(--l1)}
+.cap b{color:var(--amber);font-weight:400}
+.bal{display:grid;grid-template-columns:1fr 148px 1fr;align-items:center;
+  gap:var(--s4);padding:0 var(--gut)}
+.bal-side{display:flex;align-items:center;gap:var(--s3)}
+.bal-side.r{flex-direction:row-reverse}
+.bal-lab{font-size:10px;letter-spacing:.22em;white-space:nowrap;width:120px}
+.bal-side.r .bal-lab{text-align:right}
+.bal-lab.f{color:var(--phos)} .bal-lab.e{color:var(--alert)}
+.bal-track{flex:1;height:16px;background:#0A0C0F;border:1px solid var(--hair);
+  position:relative;overflow:hidden}
+.bal-fill{position:absolute;top:0;bottom:0;right:0;transform-origin:right;
+  background:linear-gradient(90deg,rgba(74,227,155,.10),rgba(74,227,155,.62));
+  animation:gw 1s cubic-bezier(.2,.8,.2,1) both;transition:width .3s cubic-bezier(.2,.8,.2,1)}
+.bal-side.r .bal-fill{right:auto;left:0;transform-origin:left;
+  background:linear-gradient(270deg,rgba(255,45,63,.10),rgba(255,45,63,.64))}
+@keyframes gw{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.bal-num{font-family:var(--f-mono);font-size:15px;width:80px;font-variant-numeric:tabular-nums}
+.bal-side.r .bal-num{text-align:right}
+.bal-num.f{color:var(--phos)} .bal-num.e{color:var(--alert)}
+.bal-mid{text-align:center}
+.bal-verdict{font-size:11px;letter-spacing:.2em;color:var(--alert);font-weight:700;line-height:var(--l1)}
+.bal-delta{font-family:var(--f-mono);font-size:10px;color:var(--ink3);line-height:var(--l2)}
+.flagrail{position:relative;margin-top:var(--s4);height:26px}
+.flags{display:flex;gap:var(--s2);overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap;
+  height:26px;align-items:center;padding:0 88px 0 var(--gut);scrollbar-width:thin;
+  scrollbar-color:var(--amber-dim) transparent}
+.flags::-webkit-scrollbar{height:3px}
+.flags::-webkit-scrollbar-track{background:transparent}
+.flags::-webkit-scrollbar-thumb{background:var(--amber-dim)}
+.flagrail::after{content:'';position:absolute;right:0;top:0;bottom:0;width:48px;
+  pointer-events:none;background:linear-gradient(90deg,transparent,var(--panel))}
+.flag{display:flex;align-items:center;gap:var(--s2);border:1px solid var(--amber-dim);
+  background:var(--amber-glow);padding:var(--s1) var(--s3);font-size:10px;letter-spacing:.16em;
+  color:var(--amber);white-space:nowrap;flex:0 0 auto;height:24px}
+.flag .who{font-family:var(--f-mono);color:var(--ink);letter-spacing:0}
+.flag.rec{border-color:var(--blue-dim);background:rgba(46,76,107,.15);color:var(--blue);animation:none}
+.flagcount{position:absolute;right:var(--gut);top:6px;font-family:var(--f-mono);font-size:9px;
+  color:var(--ink3);z-index:2;background:var(--panel);padding-left:var(--s2);line-height:14px}
+
+/* ---------- teams ---------- */
+.teams{flex:1;display:grid;grid-template-columns:1fr 1px 1fr;min-height:0;overflow:hidden}
+.spine{background:var(--hair)}
+.side{display:flex;flex-direction:column;min-width:0}
+.side-hd{display:flex;align-items:center;gap:var(--s3);padding:0 var(--gut);
+  height:36px;flex:0 0 36px;border-bottom:1px solid var(--hair)}
+.side-hd .t{font-size:11px;letter-spacing:.3em;font-weight:700}
+.side-hd.f .t{color:var(--phos)} .side-hd.e .t{color:var(--alert)}
+.side-hd .n{font-family:var(--f-mono);font-size:10px;color:var(--ink3);margin-left:auto}
+.side-hd .n b{color:var(--amber);font-weight:400}
+.acc{width:3px;height:12px}
+.side-hd.f .acc{background:var(--phos)} .side-hd.e .acc{background:var(--alert)}
+
+/* one column definition, shared by header / row / ghost.
+   stats are ONE cell with their own internal rhythm, so the 16px column gap
+   never leaks between the four numbers. */
+.colhd,.row,.ghost{display:grid;
+  grid-template-columns:44px 215px 110px 90px 1fr 180px;
+  gap:0 var(--colgap);align-items:center;padding:0 var(--gut)}
+.colhd{height:28px;flex:0 0 28px;font-size:9px;letter-spacing:.18em;color:var(--ink3);
+  border-bottom:1px solid var(--hair2)}
+.statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:0 var(--s2);text-align:right}
+
+.rows{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.row,.ghost{flex:1 1 0;min-height:0;position:relative;overflow:hidden}
+.row{transition:background .16s;animation:rin .34s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rin{from{opacity:0;transform:translateX(-7px)}to{opacity:1;transform:none}}
+.row:hover{background:#12161B}
+.row + .row,.row + .ghost,.ghost + .ghost,.ghost + .row{border-top:1px solid #0F1216}
+
+/* BASELINE GRID — every cell is line1 + line2 of identical height,
+   so primary content shares one optical line and secondary content shares another.
+   This is what was "chopped": cells used to centre independently. */
+.cell{display:flex;flex-direction:column;gap:var(--s1);min-width:0}
+.l1{height:var(--l1);display:flex;align-items:center;gap:var(--s2);min-width:0}
+.l2{height:var(--l2);display:flex;align-items:center;gap:var(--s2);min-width:0}
+
+.idcell{display:flex;align-items:center;gap:var(--s2);width:44px}
+.pchip{width:3px;height:36px;flex:0 0 3px}
+.pchip.solo{background:transparent}
+.pic{width:33px;height:33px;background:#171B21;border:1px solid var(--hair);display:block;object-fit:cover;object-position:center;color:transparent}
+.pic:not(.loaded){visibility:hidden}
+
+.nm{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nm .tag{color:var(--ink3);font-weight:400;font-size:12.5px}
+.sub{font-family:var(--f-mono);font-size:10px;color:var(--ink3);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+
+.pill{width:110px;text-align:center;font-size:10px;letter-spacing:.1em;font-weight:700;
+  height:var(--l1);line-height:var(--l1);white-space:nowrap}
+.meter{flex:1;height:2px;background:var(--hair2);position:relative}
+.meter i{position:absolute;left:0;top:0;bottom:0;transform-origin:left;
+  animation:gw .85s cubic-bezier(.2,.8,.2,1) both;transition:width .3s cubic-bezier(.2,.8,.2,1)}
+.rr{font-family:var(--f-mono);font-size:11px;color:var(--ink2);text-align:right;
+  font-variant-numeric:tabular-nums;width:32px;flex:0 0 32px}
+.rr b{color:var(--ink3);font-weight:400;font-size:8.5px}
+
+.peak{font-family:var(--f-mono);font-size:11.5px;color:var(--ink2);white-space:nowrap;
+  font-variant-numeric:tabular-nums}
+.peak .up{color:var(--amber);margin-left:var(--s1)}
+.peak.hi{color:var(--amber)}
+.peakact{font-family:var(--f-mono);font-size:9px;color:var(--ink3);letter-spacing:.08em}
+.stat{font-family:var(--f-mono);font-size:14px;text-align:right;font-variant-numeric:tabular-nums;
+  height:var(--l1);line-height:var(--l1)}
+.stat.dim{color:var(--ink3)}
+.stat.hi{color:var(--amber)}
+/* cruciform light-burst — the recurrence mark */
+.cross{width:9px;height:11px;flex:0 0 9px;display:block;fill:var(--blue);
+  animation:xb 3.4s ease-in-out infinite}
+@keyframes xb{0%,100%{opacity:.75}50%{opacity:1}}
+.flag .cross{fill:var(--blue)}
+.recn{font-family:var(--f-mono);font-size:9.5px;color:var(--blue)}
+
+.ghost{opacity:.45}
+.ghost .gbox{width:33px;height:33px;border:1px dashed var(--hair);margin-left:11px}
+.ghost .gslot{grid-column:2 / -1;display:flex;align-items:center;gap:var(--s3)}
+.ghost .gline{flex:1;height:1px;background:repeating-linear-gradient(90deg,
+  var(--hair) 0 4px,transparent 4px 9px)}
+.ghost .glab{font-family:var(--f-mono);font-size:9px;color:var(--ink3);letter-spacing:.22em}
+
+.row.anom{background:linear-gradient(90deg,rgba(255,107,0,.10),rgba(255,107,0,.01) 62%)}
+.row.anom::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:var(--amber)}
+.row.anom .nm{color:var(--amber)}
+.tagx{font-size:8px;letter-spacing:.16em;padding:0 var(--s1);border:1px solid var(--amber-dim);
+  color:var(--amber);flex:0 0 auto;line-height:14px}
+
+/* ---------- foot ---------- */
+.foot{flex:0 0 auto;min-height:0;border-top:1px solid var(--hair);background:var(--panel2);
+  display:grid;grid-template-columns:1fr 480px}
+.ctl{display:flex;align-items:center;gap:var(--s2);padding:var(--s3) var(--gut);min-width:0;overflow:hidden}
+.sel{background:#0A0C0F;border:1px solid var(--hair);color:var(--ink);height:28px;
+  font-family:var(--f-cond);font-size:12px;padding:0 var(--s3);letter-spacing:.1em}
+.btn{background:transparent;border:1px solid var(--hair);color:var(--ink2);height:28px;
+  font-family:var(--f-cond);font-size:11px;letter-spacing:.2em;padding:0 var(--s4);
+  cursor:pointer;transition:.14s}
+.btn:hover{border-color:var(--amber-dim);color:var(--amber);background:var(--amber-glow)}
+.btn.pri{border-color:var(--amber-dim);color:var(--amber)}
+.btn.dgr:hover{border-color:var(--alert);color:var(--alert);background:rgba(255,45,63,.09)}
+.log{border-left:1px solid var(--hair);padding:var(--s3) var(--gut);font-family:var(--f-mono);
+  font-size:10px;line-height:18px;height:92px;min-height:0;overflow-y:auto;
+  scrollbar-width:thin;scrollbar-color:var(--hair) transparent}
+.log::-webkit-scrollbar{width:3px}
+.log::-webkit-scrollbar-thumb{background:var(--hair)}
+.log .ts{color:var(--ink3)}
+.log .i{color:var(--ink2)} .log .s{color:var(--phos)} .log .a{color:var(--blue)}
+.log .w{color:var(--amber)} .log .e{color:var(--alert)}
+
+/* ---------- state hooks (additive — the mockup was a single frozen state) ---------- */
+.teams.solo{grid-template-columns:1fr}
+.teams.solo .spine{display:none}
+.app.stale .rows{opacity:.42;filter:saturate(.45);transition:opacity .3s}
+.pill.unranked{background:#2E2E2E;color:var(--ink2)}
+.log .g{color:var(--ink3)}
+
+@media (max-width:1499px){
+  html,body{overflow:auto}
+  .app{height:auto;min-height:100%;overflow:visible}
+  .teams{grid-template-columns:1fr;min-height:auto}
+  .spine{display:none}
+  .foot{grid-template-columns:1fr}
+  .log{border-left:0;border-top:1px solid var(--hair)}
+}
