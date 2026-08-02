@@ -1,8 +1,9 @@
-# LOYAL
+# LOYAL — VALORANT Rank Checker & Skin Checker
 
-An unofficial desktop companion for **VALORANT** that reads the local Riot
-Client state and presents a compact lobby readout: player ranks, peak ranks,
-RR, recent competitive statistics, party grouping, teams, and equipped skins.
+LOYAL is an unofficial **VALORANT rank checker, skin checker, lobby tracker,
+and performance checker for Windows**. It reads local Riot Client state and
+presents a compact lobby readout with player ranks, peak ranks, RR, recent
+competitive statistics, party grouping, teams, and equipped weapon skins.
 
 > **Unofficial project.** LOYAL is not affiliated with or endorsed by Riot
 > Games. Use it at your own risk and follow Riot Games' terms and policies.
@@ -23,6 +24,22 @@ context, and connection status without requiring a separate browser dashboard.
 - Starts its UI immediately and waits safely for the Riot Client.
 - Optional Discord Rich Presence integration.
 - Local rotating logs with privacy-preserving logging enabled by default.
+
+### What LOYAL checks
+
+- **Rank checker:** current competitive rank, RR, and peak rank.
+- **Skin checker:** equipped weapon skins when Riot Client data makes them
+  available.
+- **Lobby checker:** friendly and enemy players, teams, parties, and game
+  state across menus, agent select, and live matches.
+- **Performance checker:** recent K/D, headshot percentage, and win-rate data
+  when available.
+
+## Search keywords
+
+VALORANT rank checker · VALORANT skin checker · VALORANT lobby tracker ·
+VALORANT rank tracker · Riot Client companion · VALORANT performance checker ·
+VALORANT desktop app · VALORANT player stats · VALORANT lobby scanner
 
 ## Origin and attribution
 
