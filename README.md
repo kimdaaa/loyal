@@ -7,6 +7,14 @@ RR, recent competitive statistics, party grouping, teams, and equipped skins.
 > **Unofficial project.** LOYAL is not affiliated with or endorsed by Riot
 > Games. Use it at your own risk and follow Riot Games' terms and policies.
 
+## Preview
+
+![LOYAL MAGI interface](docs/loyal-ui.png)
+
+The current interface is a dark tactical readout designed for fast scanning:
+it separates friendly players, rank/RR, peak rank, recent performance, party
+context, and connection status without requiring a separate browser dashboard.
+
 ## Features
 
 - Works across menus, agent select, and live matches.
@@ -15,6 +23,20 @@ RR, recent competitive statistics, party grouping, teams, and equipped skins.
 - Starts its UI immediately and waits safely for the Riot Client.
 - Optional Discord Rich Presence integration.
 - Local rotating logs with privacy-preserving logging enabled by default.
+
+## Origin and attribution
+
+LOYAL began as a fork of [zayKenyon/VALORANT-rank-yoinker](https://github.com/zayKenyon/VALORANT-rank-yoinker).
+The project retains the original idea of reading the local Riot Client and
+displaying lobby intelligence, while this repository adds and/or substantially
+reworks the MAGI UI, asynchronous startup, state handling, player enrichment,
+privacy defaults, logging, and tests. The history and upstream relationship
+are intentionally disclosed here rather than presenting the work as wholly
+original.
+
+Development has been AI-assisted, including code generation, refactoring,
+debugging, documentation, and test-writing. Human review and local testing
+remain necessary, especially because Riot Client APIs can change.
 
 ## Requirements
 
@@ -72,4 +94,3 @@ client behaviour can change without notice.
 ## License
 
 No license has been selected yet. Until one is added, all rights are reserved.
-
