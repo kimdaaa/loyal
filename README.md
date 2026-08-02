@@ -93,4 +93,5 @@ client behaviour can change without notice.
 
 ## License
 
-No license has been selected yet. Until one is added, all rights are reserved.
+LOYAL is released under the [MIT License](LICENSE). See the attribution
+section above for the project's upstream origin.
